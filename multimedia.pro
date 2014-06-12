@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,8 +13,30 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    videoinputcontrolthread.cpp \
+    sharedframebuffer.cpp \
+    videorecorder.cpp \
+    videodevice.cpp \
+    videoframe.cpp \
+    qglcanvas.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    videoinputcontrolthread.h \
+    sharedframebuffer.h \
+    videorecorder.h \
+    videodevice.h \
+    videoframe.h \
+    config.h \
+    qglcanvas.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    mainwindow.ui
+
+OTHER_FILES += \
+    README.md
+
+INCLUDEPATH += /usr/include/opencv
+
+LIBS += /usr/lib/x86_64-linux-gnu/libopencv_core.so \
+    /usr/lib/x86_64-linux-gnu/libopencv_highgui.so
