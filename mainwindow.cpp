@@ -25,6 +25,7 @@ MainWindow::~MainWindow()
     delete ui;
 
     this->vicThread->stopLoop();
+
     delete this->vicThread;
     delete this->videoRecorder;
     delete this->frameBuffer;
@@ -39,5 +40,14 @@ void MainWindow::on_btn_PlayPause_clicked()
     } else {
         this->ui->btn_PlayPause->setText("Play");
         this->vicThread->hideFramesFromScreen();
+    }
+}
+
+void MainWindow::on_btn_Record_clicked()
+{
+    if (this->ui->btn_Record->isChecked()) {
+        this->vicThread->startPushFramesToBuffer();
+    } else {
+        this->vicThread->stopPushFramesToBuffer();
     }
 }

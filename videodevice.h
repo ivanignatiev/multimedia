@@ -1,6 +1,7 @@
 #ifndef VIDEODEVICE_H
 #define VIDEODEVICE_H
 
+#include <QMutex>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <exception>
@@ -22,12 +23,12 @@ public:
 
     bool openDevice();
     void closeDevice();
-    bool isOpened();
+    bool isOpened() const;
 
 private:
     int    device_id;
 
-
+    QMutex              *device_mutex;
     CvCapture           *device;
 };
 

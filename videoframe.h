@@ -8,11 +8,15 @@
 class VideoFrame
 {
 public:
-    VideoFrame(IplImage *_cv_frame);
-    QImage const *asQImage(void);
+    VideoFrame(IplImage *_cv_frame = NULL);
+    void setCvFrame(IplImage *_cv_frame);
+    QImage const *asQImage(void) const;
+    void setId(unsigned long id);
     ~VideoFrame(void);
 private:
-    IplImage   *cv_frame;
+    unsigned long    id;
+
+    IplImage    *cv_frame;
     QImage      *qt_frame;
 };
 

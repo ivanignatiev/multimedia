@@ -25,11 +25,11 @@ public:
 
     bool showFramesOnScreen();
     void hideFramesFromScreen();
-    bool isFramesOnScreen();
+    bool isFramesOnScreen() const;
 
     bool startPushFramesToBuffer();
     void stopPushFramesToBuffer();
-    bool isPushingFramesToBuffer();
+    bool isPushingFramesToBuffer() const;
 
     void setDevice(VideoDevice *device);
 private:

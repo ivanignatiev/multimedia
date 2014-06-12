@@ -1,8 +1,21 @@
 #include "videoframe.h"
 
 VideoFrame::VideoFrame(IplImage *_cv_frame)
-    : cv_frame(_cv_frame)
 {
+    if (_cv_frame)
+        this->setCvFrame(_cv_frame);
+}
+
+VideoFrame::~VideoFrame()
+{
+    if (this->qt_frame)
+        delete this->qt_frame;
+}
+
+void VideoFrame::setCvFrame(IplImage *_cv_frame)
+{
+    this->cv_frame = _cv_frame;
+
     this->qt_frame = new QImage(this->cv_frame->width, this->cv_frame->height, QImage::Format_RGB32);
 
     unsigned char  red, green, blue;
@@ -21,15 +34,14 @@ VideoFrame::VideoFrame(IplImage *_cv_frame)
         cvLineStart += this->cv_frame->widthStep;
     }
 
-
 }
 
-VideoFrame::~VideoFrame()
-{
-    delete this->qt_frame;
-}
-
- QImage const *VideoFrame::asQImage(void)
+QImage const *VideoFrame::asQImage(void) const
 {
     return this->qt_frame;
 }
+
+ void VideoFrame::setId(unsigned long id)
+ {
+     this->id = id;
+ }

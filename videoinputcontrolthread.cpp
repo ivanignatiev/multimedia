@@ -31,7 +31,7 @@ void VideoInputControlThread::pushToBuffer(VideoFrame *frame)
 {
     if (!frame)
         return;
-
+    this->frameBuffer->pushTop(frame);
 }
 
 void VideoInputControlThread::run()
@@ -63,6 +63,7 @@ void VideoInputControlThread::run()
         if (elapsedTime < this->frameBuffer->getFPSTime())
             this->usleep(this->frameBuffer->getFPSTime() - elapsedTime);
     }
+
 }
 
 bool VideoInputControlThread::showFramesOnScreen()
@@ -77,7 +78,7 @@ void VideoInputControlThread::hideFramesFromScreen()
         this->device->closeDevice();
 }
 
-bool VideoInputControlThread::isFramesOnScreen()
+bool VideoInputControlThread::isFramesOnScreen() const
 {
     return this->displaying;
 }
@@ -95,13 +96,14 @@ void VideoInputControlThread::stopPushFramesToBuffer()
         this->device->closeDevice();
 }
 
-bool VideoInputControlThread::isPushingFramesToBuffer()
+bool VideoInputControlThread::isPushingFramesToBuffer() const
 {
     return this->pushing;
 }
 
 void VideoInputControlThread::stopLoop() {
     this->inLoop = false;
+    wait();
     // TODO : use default QThread signals
 }
 

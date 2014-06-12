@@ -27,6 +27,8 @@ private slots:
 
     void on_btn_PlayPause_clicked();
 
+    void on_btn_Record_clicked();
+
 private:
 
     SharedFrameBuffer *frameBuffer;
