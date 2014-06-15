@@ -15,20 +15,38 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     videoinputcontrolthread.cpp \
-    sharedframebuffer.cpp \
     videorecorder.cpp \
     videodevice.cpp \
     videoframe.cpp \
-    qglcanvas.cpp
+    qglcanvas.cpp \
+    videoplayer.cpp \
+    videolibrary.cpp \
+    audiorecorder.cpp \
+    audiodevice.cpp \
+    ioutputvideostream.cpp \
+    iinputvideostream.cpp \
+    fileoutputvideostream.cpp \
+    videoencoder.cpp \
+    fileinputvideostream.cpp \
+    videodecoder.cpp
 
 HEADERS  += mainwindow.h \
     videoinputcontrolthread.h \
-    sharedframebuffer.h \
     videorecorder.h \
     videodevice.h \
     videoframe.h \
     config.h \
-    qglcanvas.h
+    qglcanvas.h \
+    videoplayer.h \
+    videolibrary.h \
+    audiorecorder.h \
+    audiodevice.h \
+    ioutputvideostream.h \
+    iinputvideostream.h \
+    fileoutputvideostream.h \
+    videoencoder.h \
+    fileinputvideostream.h \
+    videodecoder.h
 
 FORMS    += \
     mainwindow.ui

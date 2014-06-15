@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QGLWidget>
 #include <QPainter>
+#include <QSharedPointer>
+#include "videoframe.h"
 
 namespace Ui {
     class QGLCanvas;
@@ -12,12 +14,12 @@ namespace Ui {
 class QGLCanvas : public QGLWidget
 {
 
+    Q_OBJECT
+
 public:
 
     explicit QGLCanvas(QWidget* parent = NULL);
     ~QGLCanvas();
-
-    void setImage(const QImage &image);
 
 protected:
 
@@ -27,6 +29,8 @@ private:
 
     QImage img;
 
+public slots:
+    void changeFrame(VideoFramePointer frame);
 
 
 };

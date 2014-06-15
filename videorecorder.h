@@ -2,7 +2,12 @@
 #define VIDEORECORDER_H
 
 #include <QThread>
-#include "sharedframebuffer.h"
+#include <QMutex>
+#include <queue>
+#include "config.h"
+#include "videoframe.h"
+#include "ioutputvideostream.h"
+#include "videoencoder.h"
 
 class VideoRecorder : public QThread
 {
@@ -11,12 +16,26 @@ class VideoRecorder : public QThread
     void run();
 
 public:
-    explicit VideoRecorder(SharedFrameBuffer *frameBuffer, QObject *parent = 0);
+    explicit VideoRecorder(VideoConfig const &_config, QObject *parent = 0);
+    ~VideoRecorder();
+
+    void startRecording(IOutputVideoStream *out);
+    void stopRecording();
+    bool isRecording() const;
+
+    void stop();
 private:
-    SharedFrameBuffer *frameBuffer;
+    bool running;
+    bool recording;
+    std::queue<VideoFramePointer> *framesBuffer;
+    QMutex  *framesBufferMutex;
+    VideoConfig videoConfig;
+    IOutputVideoStream *out;
+
 signals:
 
 public slots:
+    void changeFrame(VideoFramePointer frame);
 
 };
 

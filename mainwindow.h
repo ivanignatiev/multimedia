@@ -3,12 +3,16 @@
 
 #include <QObject>
 #include <QMainWindow>
+#include <QSharedPointer>
 #include "videoinputcontrolthread.h"
 #include "videorecorder.h"
-#include "sharedframebuffer.h"
 #include "videodevice.h"
 #include "config.h"
 #include "qglcanvas.h"
+#include "videoframe.h"
+#include "videoplayer.h"
+#include "fileoutputvideostream.h"
+#include "fileinputvideostream.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,14 +33,26 @@ private slots:
 
     void on_btn_Record_clicked();
 
+    void on_btn_Stop_clicked();
+
+    void on_btn_PlayPause_4_clicked();
+
+    void on_btn_StopPlayer_clicked();
+
 private:
 
-    SharedFrameBuffer *frameBuffer;
     VideoInputControlThread *vicThread;
     VideoRecorder *videoRecorder;
+    VideoPlayer *videoPlayer;
     VideoDevice *videoDevice;
     Ui::MainWindow *ui;
-    QGLCanvas   *videoScreen;
+
+    QGLCanvas   *videoRecorderScreen;
+    QGLCanvas   *videoPlayerScreen;
+
+    VideoConfig videoConfig;
+    FileOutputVideoStream *outputFileStream;
+    FileInputVideoStream *inputFileStream;
 };
 
 #endif // MAINWINDOW_H

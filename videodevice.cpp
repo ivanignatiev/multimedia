@@ -10,7 +10,7 @@ VideoDevice::VideoDevice(int _device_id)
 
 VideoDevice::~VideoDevice()
 {
-    this->closeDevice();
+    this->close();
 }
 
 VideoFrame *VideoDevice::getFrame()
@@ -26,7 +26,7 @@ VideoFrame *VideoDevice::getFrame()
     return NULL;
 }
 
-bool VideoDevice::openDevice()
+bool VideoDevice::open()
 {
     if (this->device)
         return true;
@@ -36,7 +36,7 @@ bool VideoDevice::openDevice()
     return (this->device != NULL);
 }
 
-void VideoDevice::closeDevice()
+void VideoDevice::close()
 {
     if (this->device) {
         this->device_mutex->lock();

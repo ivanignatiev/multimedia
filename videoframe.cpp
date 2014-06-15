@@ -1,9 +1,15 @@
 #include "videoframe.h"
 
-VideoFrame::VideoFrame(IplImage *_cv_frame)
+VideoFrame::VideoFrame(IplImage const *cv_frame)
 {
-    if (_cv_frame)
-        this->setCvFrame(_cv_frame);
+    if (cv_frame)
+        this->setCvFrame(cv_frame);
+}
+
+VideoFrame::VideoFrame(VideoFrameData const *file_frame, VideoHeader const *header)
+{
+    if (file_frame)
+        this->setFileFrame(file_frame, header);
 }
 
 VideoFrame::~VideoFrame()
@@ -12,36 +18,57 @@ VideoFrame::~VideoFrame()
         delete this->qt_frame;
 }
 
-void VideoFrame::setCvFrame(IplImage *_cv_frame)
+void VideoFrame::setFileFrame(VideoFrameData const *file_frame, VideoHeader const *header)
 {
-    this->cv_frame = _cv_frame;
+    this->qt_frame = new QImage(header->width, header->height, QImage::Format_RGB32);
 
-    this->qt_frame = new QImage(this->cv_frame->width, this->cv_frame->height, QImage::Format_RGB32);
+    int i = 0;
+    unsigned char r, g, b;
+    for (int y = 0; y < header->height; ++y) {
+        for (int x = 0; x < header->width; ++x) {
+            r = file_frame->data[i];
+            g = file_frame->data[i + 1];
+            b = file_frame->data[i + 2];
 
-    unsigned char  red, green, blue;
-    unsigned int cvIndex = 0, cvLineStart = 0;
-    unsigned int y, x;
-    for (y = 0; y < this->cv_frame->height; ++y) {
-        cvIndex = cvLineStart;
-        for (x = 0; x < this->cv_frame->width; ++x) {
-            red = this->cv_frame->imageData[cvIndex + 2];
-            green = this->cv_frame->imageData[cvIndex + 1];
-            blue = this->cv_frame->imageData[cvIndex + 0];
-
-            this->qt_frame->setPixel(x, y, qRgb(red, green, blue));
-            cvIndex += 3;
+            this->qt_frame->setPixel(x, y, qRgb(r, g, b));
+            i += 3;
         }
-        cvLineStart += this->cv_frame->widthStep;
     }
 
 }
 
-QImage const *VideoFrame::asQImage(void) const
+void VideoFrame::setCvFrame(IplImage const *cv_frame)
 {
-    return this->qt_frame;
+    this->qt_frame = new QImage(cv_frame->width, cv_frame->height, QImage::Format_RGB32);
+
+    unsigned char  red, green, blue;
+    unsigned int cvIndex = 0, cvLineStart = 0;
+    unsigned int y, x;
+    for (y = 0; y < cv_frame->height; ++y) {
+        cvIndex = cvLineStart;
+        for (x = 0; x < cv_frame->width; ++x) {
+            red = cv_frame->imageData[cvIndex + 2];
+            green = cv_frame->imageData[cvIndex + 1];
+            blue = cv_frame->imageData[cvIndex + 0];
+
+            this->qt_frame->setPixel(x, y, qRgb(red, green, blue));
+            cvIndex += 3;
+        }
+        cvLineStart += cv_frame->widthStep;
+    }
 }
 
- void VideoFrame::setId(unsigned long id)
- {
-     this->id = id;
- }
+QImage const &VideoFrame::asQImage(void) const
+{
+    return *(this->qt_frame);
+}
+
+unsigned short VideoFrame::getWidth(void) const
+{
+    return this->qt_frame->width();
+}
+
+unsigned short VideoFrame::getHeight(void) const
+{
+    return this->qt_frame->height();
+}

@@ -10,11 +10,10 @@ QGLCanvas::~QGLCanvas()
 
 }
 
-void QGLCanvas::setImage(const QImage &image)
+void QGLCanvas::changeFrame(VideoFramePointer frame)
 {
-    img = image;
-
-    qDebug() << "Show frame on the screen";
+    img = frame->asQImage();
+    this->update();
 
 }
 

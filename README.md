@@ -8,3 +8,4 @@ dependencies:
 
     - For work on that project you need to install QTCreator 3.x and QT Lib 5.2.x
     - any OS is perfect
+    - opencv

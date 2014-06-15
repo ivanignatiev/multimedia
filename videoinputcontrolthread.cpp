@@ -1,109 +1,72 @@
 #include "videoinputcontrolthread.h"
 
-VideoInputControlThread::VideoInputControlThread(VideoDevice *_device, QGLCanvas *_screen, SharedFrameBuffer *_frameBuffer, QObject *parent) :
+VideoInputControlThread::VideoInputControlThread(VideoDevice *_device, VideoConfig const &_config, QObject *parent) :
     QThread(parent),
-    inLoop(true),
+    running(true),
     device(_device),
-    frameBuffer(_frameBuffer),
-    displaying(false),
-    pushing(false),
-    screen(_screen)
+    videoConfig(_config)
 {
 
 }
 
 VideoInputControlThread::~VideoInputControlThread()
 {
-
+    this->stop();
 }
 
-
-void VideoInputControlThread::showOnScreen(VideoFrame *frame)
-{
-    if (!frame)
-        return;
-
-    this->screen->setImage(*(frame->asQImage()));
-    this->screen->update();
-}
-
-void VideoInputControlThread::pushToBuffer(VideoFrame *frame)
-{
-    if (!frame)
-        return;
-    this->frameBuffer->pushTop(frame);
-}
 
 void VideoInputControlThread::run()
 {
     struct timeval	start_loop;
     struct timeval	stop_loop;
     unsigned long long	elapsedTime;
+    int framesCount = 0;
 
-    while (this->inLoop) {
+    while (this->running || framesCount != 0) {
         gettimeofday(&start_loop, NULL);
-        if (this->isFramesOnScreen() || this->isPushingFramesToBuffer()) {
-            VideoFrame *frame = this->device->getFrame();
 
-            if (this->isFramesOnScreen()) {
-                this->showOnScreen(frame);
-            }
+        if (this->isCapturing()) {
+            VideoFramePointer frame = VideoFramePointer(this->device->getFrame());
 
-            if (this->isPushingFramesToBuffer()) {
-                this->pushToBuffer(frame);
-            } else if (frame) {
-                delete frame;
-            }
+            emit frameChanged(frame);
         }
+
         gettimeofday(&stop_loop, NULL);
 
         elapsedTime = (stop_loop.tv_sec - start_loop.tv_sec) * 1000000;
         elapsedTime = elapsedTime + (stop_loop.tv_usec - start_loop.tv_usec);
 
-        if (elapsedTime < this->frameBuffer->getFPSTime())
-            this->usleep(this->frameBuffer->getFPSTime() - elapsedTime);
+        if (elapsedTime < this->videoConfig.delta_time)
+            this->usleep(this->videoConfig.delta_time - elapsedTime);
+
+        framesCount = (framesCount + 1) % this->videoConfig.fps;
     }
 
 }
 
-bool VideoInputControlThread::showFramesOnScreen()
-{
-    return (this->displaying = this->device->openDevice());
+void VideoInputControlThread::stop() {
+    this->running = false;
+    this->wait();
 }
 
-void VideoInputControlThread::hideFramesFromScreen()
+void VideoInputControlThread::setDevice(VideoDevice *device)
 {
-    this->displaying = false;
-    if (!this->isPushingFramesToBuffer())
-        this->device->closeDevice();
+    this->device = device;
 }
 
-bool VideoInputControlThread::isFramesOnScreen() const
+void VideoInputControlThread::startCapturing(void)
 {
-    return this->displaying;
+    this->capturing = this->device->open();
 }
 
-
-bool VideoInputControlThread::startPushFramesToBuffer()
+void VideoInputControlThread::stopCapturing(void)
 {
-    return (this->pushing = this->device->openDevice());
+    this->capturing = false;
+    this->device->close();
 }
 
-void VideoInputControlThread::stopPushFramesToBuffer()
+bool VideoInputControlThread::isCapturing(void) const
 {
-    this->pushing = false;
-    if (!this->isFramesOnScreen())
-        this->device->closeDevice();
-}
-
-bool VideoInputControlThread::isPushingFramesToBuffer() const
-{
-    return this->pushing;
-}
-
-void VideoInputControlThread::stopLoop() {
-    this->inLoop = false;
-    wait();
-    // TODO : use default QThread signals
+    return this->capturing;
 }
 

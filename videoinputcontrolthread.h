@@ -4,8 +4,9 @@
 #include <QThread>
 #include <QGraphicsView>
 #include <QDebug>
+#include <QSharedPointer>
 #include <sys/time.h>
-#include "sharedframebuffer.h"
+#include "config.h"
 #include "videodevice.h"
 #include "qglcanvas.h"
 
@@ -15,35 +16,29 @@ class VideoInputControlThread : public QThread
 
     void run();
 
-    void showOnScreen(VideoFrame *frame);
-    void pushToBuffer(VideoFrame *frame);
 public:
-    explicit VideoInputControlThread(VideoDevice *_device, QGLCanvas *_screen, SharedFrameBuffer *_frameBuffer, QObject *parent = 0);
+    explicit VideoInputControlThread(VideoDevice *_device, VideoConfig const &_config, QObject *parent = 0);
     ~VideoInputControlThread();
 
-    void stopLoop();
+    void stop();
 
-    bool showFramesOnScreen();
-    void hideFramesFromScreen();
-    bool isFramesOnScreen() const;
-
-    bool startPushFramesToBuffer();
-    void stopPushFramesToBuffer();
-    bool isPushingFramesToBuffer() const;
+    void startCapturing(void);
+    void stopCapturing(void);
+    bool isCapturing(void) const;
 
     void setDevice(VideoDevice *device);
 private:
 
-    bool inLoop;
-    bool displaying;
-    bool pushing;
+    bool running;
+    bool capturing;
+    unsigned int fps;
+    unsigned long fps_time;
 
     VideoDevice         *device;
-    SharedFrameBuffer   *frameBuffer;
-    QGLCanvas           *screen;
+    VideoConfig         videoConfig;
 
 signals:
-    void frameChanged(QImage *frame);
+    void frameChanged(VideoFramePointer frame);
 
 public slots:
 

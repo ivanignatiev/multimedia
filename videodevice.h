@@ -21,8 +21,8 @@ public:
 
     VideoFrame *getFrame();
 
-    bool openDevice();
-    void closeDevice();
+    bool open();
+    void close();
     bool isOpened() const;
 
 private:
