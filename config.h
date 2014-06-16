@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-#define _DEFAULT_FPS        3
+#define _DEFAULT_FPS        25
 #define _USECOND            1000000
 #define _DEFAULT_DEVICE_ID  0
 #define _DEFAULT_SCREEN_WIDTH   640

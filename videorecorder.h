@@ -1,7 +1,6 @@
 #ifndef VIDEORECORDER_H
 #define VIDEORECORDER_H
 
-#include <QDebug>
 #include <QThread>
 #include <QMutex>
 #include <queue>

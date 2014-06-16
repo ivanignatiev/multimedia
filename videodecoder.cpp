@@ -11,19 +11,22 @@ VideoDecoder::VideoDecoder()
 void VideoDecoder::convertYUVtoRGB(VideoFrameData *frameData, VideoHeader const *header)
 {
     int Y_step = header->width * header->height;
-    int UV_step = Y_step; //Y_step / 2;
+    int UV_step = Y_step / 4;
     int RGB_step = Y_step;
 
     unsigned char *RGB_data = new unsigned char[RGB_step * 3];
 
-    int i = 0;
+    int i = 0, j = 0, jy = 0;
     int C, D, E;
     int r, g, b;
     for (int y = 0; y < header->height; ++y) {
+        jy = ((y - y % 2) / 2) * (header->width / 2);
         for (int x = 0; x < header->width; ++x) {
             C = frameData->data[i] - 16;
-            D = frameData->data[Y_step + i] - 128;
-            E = frameData->data[Y_step + UV_step + i] - 128;
+
+            j = jy + ((x - x % 2) / 2);
+            D = frameData->data[Y_step + j] - 128;
+            E = frameData->data[Y_step + UV_step + j] - 128;
 
             r = CLIP( 1.164383 * C + 1.596027 * E  );
             g = CLIP( 1.164383 * C - (0.391762 * D) - (0.812968 * E) );
@@ -32,6 +35,9 @@ void VideoDecoder::convertYUVtoRGB(VideoFrameData *frameData, VideoHeader const 
             RGB_data[i] = (unsigned char)r;
             RGB_data[RGB_step + i] = (unsigned char)g;
             RGB_data[RGB_step * 2 + i] = (unsigned char)b;
+
+            //RGB_data[i] = RGB_data[RGB_step + i] = RGB_data[RGB_step * 2 + i] = (unsigned char)E;
+
 
             ++i;
         }

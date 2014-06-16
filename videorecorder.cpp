@@ -33,7 +33,6 @@ void VideoRecorder::run()
             this->framesBufferMutex->unlock();
 
             videoFrame->setType(this->idFrame % this->videoConfig.fps == 0 ? IFrame : PFrame);
-            qDebug() << "id frame = " << this->idFrame << " type " << videoFrame->getType() ;
 
             VideoFrameData *frame = VideoEncoder::proccessFrame(videoFrame);
             this->out->pushFrameData(*frame);
