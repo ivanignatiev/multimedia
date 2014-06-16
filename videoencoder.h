@@ -9,6 +9,7 @@ class VideoEncoder
 public:
     static VideoFrameData *proccessFrame(VideoFramePointer frame, VideoConfig const &config);
 private:
+    static void convertRGBToYUV(VideoFramePointer frame, VideoFrameData *data);
     VideoEncoder();
 };
 

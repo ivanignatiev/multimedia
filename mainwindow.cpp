@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->vicThread, SIGNAL(frameChanged(VideoFramePointer)), this->videoRecorderScreen, SLOT(changeFrame(VideoFramePointer)));
     connect(this->vicThread, SIGNAL(frameChanged(VideoFramePointer)), this->videoRecorder, SLOT(changeFrame(VideoFramePointer)));
     connect(this->videoPlayer, SIGNAL(frameChanged(VideoFramePointer)), this->videoPlayerScreen, SLOT(changeFrame(VideoFramePointer)));
+    connect(this->videoPlayer, SIGNAL(frameChanged(VideoFramePointer)), this, SLOT(changeFrame(VideoFramePointer)));
 }
 
 MainWindow::~MainWindow()
@@ -94,6 +95,8 @@ void MainWindow::on_btn_PlayPause_4_clicked()
     if (this->ui->btn_PlayPause_4->text() == "Play") {
         if (this->inputFileStream == NULL) {
             this->inputFileStream = new FileInputVideoStream("1");
+            int seconds = this->inputFileStream->getHeader().frames_count / this->inputFileStream->getHeader().fps;
+            this->ui->scroll_VidePlayer->setMaximum(seconds);
         }
         this->ui->btn_PlayPause_4->setText("Pause");
         this->videoPlayer->startPlaying(this->inputFileStream);
@@ -108,4 +111,16 @@ void MainWindow::on_btn_StopPlayer_clicked()
     this->videoPlayer->stopPlaying();
     delete this->inputFileStream;
     this->inputFileStream = NULL;
+}
+
+void MainWindow::changeFrame(VideoFramePointer frame)
+{
+    int second = this->videoPlayer->getFrameId() / this->inputFileStream->getHeader().fps;
+    this->ui->scroll_VidePlayer->setValue(second);
+}
+
+void MainWindow::on_scroll_VidePlayer_sliderMoved(int position)
+{
+    this->videoPlayer->setFrameId(position * this->inputFileStream->getHeader().fps);
+    // TODO : find better slot! It's just moving and no clicking
 }

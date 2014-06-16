@@ -319,7 +319,7 @@
        </property>
        <layout class="QVBoxLayout" name="videoPlayerLayout"/>
       </widget>
-      <widget class="QScrollBar" name="horizontalScrollBar">
+      <widget class="QScrollBar" name="scroll_VidePlayer">
        <property name="geometry">
         <rect>
          <x>10</x>

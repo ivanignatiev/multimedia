@@ -3,7 +3,8 @@
 VideoPlayer::VideoPlayer() :
     idFrame(0),
     input(NULL),
-    running(true)
+    running(true),
+    step(1)
 {
 
 }
@@ -26,7 +27,7 @@ void VideoPlayer::run()
     unsigned long long	elapsedTime;
 
     while (this->running) {
-        if (this->input != NULL) {
+        if (this->input != NULL && this->playing) {
             gettimeofday(&start_loop, NULL);
 
             VideoFrameData *frameData = this->input->getFrameData(this->idFrame);
@@ -35,7 +36,9 @@ void VideoPlayer::run()
 
             emit frameChanged(frame);
 
-            this->idFrame = (this->idFrame + 1 ) % this->input->getHeader().frames_count;
+            delete frameData;
+
+            this->idFrame = (this->idFrame + this->step ) % this->input->getHeader().frames_count;
 
             gettimeofday(&stop_loop, NULL);
 
@@ -53,7 +56,7 @@ void VideoPlayer::run()
 
 void VideoPlayer::startPlaying(IInputVideoStream *input)
 {
-    running = true;
+    this->playing = true;
     if (this->input != input) {
         this->idFrame = 0;
     }
@@ -62,7 +65,15 @@ void VideoPlayer::startPlaying(IInputVideoStream *input)
 
 void VideoPlayer::stopPlaying()
 {
-    running = false;
+    this->playing = false;
 }
 
+void VideoPlayer::setFrameId(unsigned long idFrame)
+{
+    this->idFrame = idFrame;
+}
 
+unsigned long VideoPlayer::getFrameId(void) const
+{
+    return this->idFrame;
+}

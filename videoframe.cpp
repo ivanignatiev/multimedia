@@ -22,16 +22,17 @@ void VideoFrame::setFileFrame(VideoFrameData const *file_frame, VideoHeader cons
 {
     this->qt_frame = new QImage(header->width, header->height, QImage::Format_RGB32);
 
+    int RGB_step = header->width * header->height;
     int i = 0;
     unsigned char r, g, b;
     for (int y = 0; y < header->height; ++y) {
         for (int x = 0; x < header->width; ++x) {
             r = file_frame->data[i];
-            g = file_frame->data[i + 1];
-            b = file_frame->data[i + 2];
+            g = file_frame->data[RGB_step + i];
+            b = file_frame->data[RGB_step * 2 + i];
 
             this->qt_frame->setPixel(x, y, qRgb(r, g, b));
-            i += 3;
+            ++i;
         }
     }
 

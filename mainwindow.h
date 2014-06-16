@@ -39,6 +39,11 @@ private slots:
 
     void on_btn_StopPlayer_clicked();
 
+
+    void changeFrame(VideoFramePointer frame);
+
+    void on_scroll_VidePlayer_sliderMoved(int position);
+
 private:
 
     VideoInputControlThread *vicThread;

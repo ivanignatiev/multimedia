@@ -24,6 +24,10 @@ public:
     void startPlaying(IInputVideoStream *input);
     void stopPlaying();
 
+    void setFrameId(unsigned long idFrame);
+
+    unsigned long getFrameId() const;
+
 private:
     bool running;
     bool playing;
