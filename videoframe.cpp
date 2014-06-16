@@ -1,12 +1,14 @@
 #include "videoframe.h"
 
-VideoFrame::VideoFrame(IplImage const *cv_frame)
+VideoFrame::VideoFrame(IplImage const *cv_frame) :
+    type(IFrame)
 {
     if (cv_frame)
         this->setCvFrame(cv_frame);
 }
 
 VideoFrame::VideoFrame(VideoFrameData const *file_frame, VideoHeader const *header)
+    : type(IFrame)
 {
     if (file_frame)
         this->setFileFrame(file_frame, header);
@@ -21,7 +23,7 @@ VideoFrame::~VideoFrame()
 void VideoFrame::setFileFrame(VideoFrameData const *file_frame, VideoHeader const *header)
 {
     this->qt_frame = new QImage(header->width, header->height, QImage::Format_RGB32);
-
+    this->type = file_frame->header.type;
     int RGB_step = header->width * header->height;
     int i = 0;
     unsigned char r, g, b;
@@ -72,4 +74,13 @@ unsigned short VideoFrame::getWidth(void) const
 unsigned short VideoFrame::getHeight(void) const
 {
     return this->qt_frame->height();
+}
+
+
+void VideoFrame::setType(VideoFrameType type) {
+    this->type = type;
+}
+
+VideoFrameType VideoFrame::getType(void) const {
+    return this->type;
 }

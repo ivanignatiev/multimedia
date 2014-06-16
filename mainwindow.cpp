@@ -88,6 +88,7 @@ void MainWindow::on_btn_Stop_clicked()
     delete this->outputFileStream;
     this->outputFileStream = NULL;
     this->ui->btn_Record->setChecked(false);
+    this->ui->btn_PlayPause->setText("Play");
 }
 
 void MainWindow::on_btn_PlayPause_4_clicked()
@@ -111,6 +112,7 @@ void MainWindow::on_btn_StopPlayer_clicked()
     this->videoPlayer->stopPlaying();
     delete this->inputFileStream;
     this->inputFileStream = NULL;
+    this->ui->btn_PlayPause_4->setText("Play");
 }
 
 void MainWindow::changeFrame(VideoFramePointer frame)

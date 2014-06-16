@@ -2,6 +2,8 @@
 
 #define CLIP(x) (((x) < 0) ?  0 : (((x) > 255) ? 255 : (x)))
 
+unsigned char *VideoDecoder::previosFrameData = NULL;
+
 VideoDecoder::VideoDecoder()
 {
 }
@@ -39,10 +41,29 @@ void VideoDecoder::convertYUVtoRGB(VideoFrameData *frameData, VideoHeader const 
     frameData->data = RGB_data;
 }
 
+void VideoDecoder::merge(VideoFrameData *frameData, unsigned char *previousData)
+{
+    for (int i = 0; i < frameData->header.content_length; ++i) {
+        frameData->data[i] = frameData->data[i] ^ previousData[i];
+    }
+}
+
 VideoFramePointer VideoDecoder::processFrameData(VideoFrameData *frameData, VideoHeader const *header)
 {
+
+    if (frameData->header.type == PFrame) {
+        VideoDecoder::merge(frameData, VideoDecoder::previosFrameData);
+    } else if(frameData->header.type == IFrame) {
+        if (VideoDecoder::previosFrameData)
+            delete VideoDecoder::previosFrameData;
+        // TODO : delete destructor
+        VideoDecoder::previosFrameData = new unsigned char[frameData->header.content_length];
+        std::memcpy(VideoDecoder::previosFrameData, frameData->data, frameData->header.content_length);
+    }
+
     VideoDecoder::convertYUVtoRGB(frameData, header);
 
     VideoFramePointer frame = VideoFramePointer(new VideoFrame(frameData, header));
+
     return frame;
 }

@@ -22,8 +22,8 @@ FileOutputVideoStream::~FileOutputVideoStream()
 
 void FileOutputVideoStream::FileOutputVideoStream::pushFrameData(VideoFrameData &videoFrameData)
 {
-    this->header.content_length += videoFrameData.header.content_length;
     videoFrameData.header.data_adress = this->header.content_length;
+    this->header.content_length += videoFrameData.header.content_length;
 
     fwrite(videoFrameData.data, videoFrameData.header.content_length, 1, this->fd );
 

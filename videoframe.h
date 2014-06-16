@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QSharedPointer>
 
+enum VideoFrameType {IFrame, PFrame};
 
 struct VideoHeader {
     unsigned int    version;
@@ -18,7 +19,7 @@ struct VideoHeader {
 
 struct VideoFrameHeader {
     unsigned int content_length;
-    unsigned char type; // full , diff
+    VideoFrameType type;
     unsigned long data_adress;
 };
 
@@ -26,6 +27,8 @@ struct VideoFrameData {
     VideoFrameHeader    header;
     unsigned char       *data;
 };
+
+
 
 class VideoFrame
 {
@@ -41,13 +44,18 @@ public:
     unsigned short getWidth(void) const;
     unsigned short getHeight(void) const;
 
+    void setType(VideoFrameType type);
+    VideoFrameType getType(void) const;
+
     ~VideoFrame(void);
 private:
 
     QImage      *qt_frame;
+    VideoFrameType type;
 };
 
 
 typedef QSharedPointer<VideoFrame> VideoFramePointer;
+typedef QSharedPointer<VideoFrameData> VideoFrameDataPointer;
 
 #endif // VIDEOFRAME_H

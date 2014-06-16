@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <QDebug>
+
 #define _DEFAULT_FPS        3
 #define _USECOND            1000000
 #define _DEFAULT_DEVICE_ID  0

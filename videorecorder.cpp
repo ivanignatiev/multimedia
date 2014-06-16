@@ -6,7 +6,8 @@ VideoRecorder::VideoRecorder(VideoConfig const &_config, QObject *parent) :
     framesBufferMutex(new QMutex()),
     running(true),
     videoConfig(_config),
-    out(NULL)
+    out(NULL),
+    idFrame(0)
 {
 }
 
@@ -31,9 +32,12 @@ void VideoRecorder::run()
             this->framesBuffer->pop();
             this->framesBufferMutex->unlock();
 
-            VideoFrameData *frame = VideoEncoder::proccessFrame(videoFrame, this->videoConfig);
-            this->out->pushFrameData(*frame);
+            videoFrame->setType(this->idFrame % this->videoConfig.fps == 0 ? IFrame : PFrame);
+            qDebug() << "id frame = " << this->idFrame << " type " << videoFrame->getType() ;
 
+            VideoFrameData *frame = VideoEncoder::proccessFrame(videoFrame);
+            this->out->pushFrameData(*frame);
+            this->idFrame++;
         } else {
             this->usleep(this->videoConfig.delta_time);
         }
@@ -45,10 +49,12 @@ void VideoRecorder::startRecording(IOutputVideoStream *out)
     this->recording = true;
     if (this->out == NULL) {
         this->out = out;
+        this->idFrame = 0;
     } else if (this->out != out) {
         this->stopRecording();
         this->out = out;
         this->recording = true;
+        this->idFrame = 0;
     }
 }
 

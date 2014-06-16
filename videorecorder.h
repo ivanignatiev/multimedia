@@ -1,6 +1,7 @@
 #ifndef VIDEORECORDER_H
 #define VIDEORECORDER_H
 
+#include <QDebug>
 #include <QThread>
 #include <QMutex>
 #include <queue>
@@ -31,6 +32,7 @@ private:
     QMutex  *framesBufferMutex;
     VideoConfig videoConfig;
     IOutputVideoStream *out;
+    unsigned long idFrame;
 
 signals:
 
