@@ -241,7 +241,7 @@ VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
         VideoEncoder::previosFrameData = preDiffData;
     }
 
-    //VideoEncoder::applyZeroRLE(data);
+    VideoEncoder::applyZeroRLE(data);
 
     return data;
 }

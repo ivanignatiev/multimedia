@@ -144,6 +144,7 @@ void VideoDecoder::decompresseZeroRLE(VideoFrameData *data)
     }
 
     delete data->data;
+    data->data = new unsigned char[k];
     std::memcpy(data->data, result, k);
     data->header.content_length = k;
 }
@@ -153,7 +154,7 @@ VideoFramePointer VideoDecoder::processFrameData(VideoFrameData *frameData, Vide
     frameData->width = header->width;
     frameData->height = header->height;
 
-    //VideoDecoder::decompresseZeroRLE(frameData);
+    VideoDecoder::decompresseZeroRLE(frameData);
 
     if (frameData->header.type == PFrame) {
         VideoDecoder::merge(frameData, VideoDecoder::previosFrameData);
