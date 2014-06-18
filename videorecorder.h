@@ -22,9 +22,12 @@ public:
     void startRecording(IOutputVideoStream *out);
     void stopRecording();
     bool isRecording() const;
+    void waitToFinish();
 
     void stop();
 private:
+
+
     bool running;
     bool recording;
     std::queue<VideoFramePointer> *framesBuffer;
@@ -34,7 +37,7 @@ private:
     unsigned long idFrame;
 
 signals:
-
+    void framesProccessed(unsigned long count, unsigned long buffer);
 public slots:
     void changeFrame(VideoFramePointer frame);
 

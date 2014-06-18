@@ -11,6 +11,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = multimedia
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -fopenmp
+LIBS += -fopenmp
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -21,8 +23,6 @@ SOURCES += main.cpp\
     qglcanvas.cpp \
     videoplayer.cpp \
     videolibrary.cpp \
-    audiorecorder.cpp \
-    audiodevice.cpp \
     ioutputvideostream.cpp \
     iinputvideostream.cpp \
     fileoutputvideostream.cpp \
@@ -39,14 +39,14 @@ HEADERS  += mainwindow.h \
     qglcanvas.h \
     videoplayer.h \
     videolibrary.h \
-    audiorecorder.h \
-    audiodevice.h \
     ioutputvideostream.h \
     iinputvideostream.h \
     fileoutputvideostream.h \
     videoencoder.h \
     fileinputvideostream.h \
-    videodecoder.h
+    videodecoder.h \
+    dct.h \
+    yuv.h
 
 FORMS    += \
     mainwindow.ui

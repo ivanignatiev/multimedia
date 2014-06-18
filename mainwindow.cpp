@@ -30,7 +30,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this->vicThread, SIGNAL(frameChanged(VideoFramePointer)), this->videoRecorderScreen, SLOT(changeFrame(VideoFramePointer)));
     connect(this->vicThread, SIGNAL(frameChanged(VideoFramePointer)), this->videoRecorder, SLOT(changeFrame(VideoFramePointer)));
     connect(this->videoPlayer, SIGNAL(frameChanged(VideoFramePointer)), this->videoPlayerScreen, SLOT(changeFrame(VideoFramePointer)));
-    connect(this->videoPlayer, SIGNAL(frameChanged(VideoFramePointer)), this, SLOT(changeFrame(VideoFramePointer)));
+
+    connect(this->videoRecorder, SIGNAL(framesProccessed(ulong,ulong)), this, SLOT(framesProccessed(ulong,ulong)));
+    connect(this->videoPlayer, SIGNAL(framePlayed(ulong,ulong)), this, SLOT(framePlayed(ulong,ulong)));
+
 }
 
 MainWindow::~MainWindow()
@@ -83,12 +86,15 @@ void MainWindow::on_btn_Record_clicked()
 
 void MainWindow::on_btn_Stop_clicked()
 {
-    this->vicThread->stopCapturing();
-    this->videoRecorder->stopRecording();
-    delete this->outputFileStream;
-    this->outputFileStream = NULL;
-    this->ui->btn_Record->setChecked(false);
-    this->ui->btn_PlayPause->setText("Play");
+    if (this->outputFileStream) {
+        this->vicThread->stopCapturing();
+        this->videoRecorder->stopRecording();
+        this->videoRecorder->waitToFinish();
+        delete this->outputFileStream;
+        this->outputFileStream = NULL;
+        this->ui->btn_Record->setChecked(false);
+        this->ui->btn_PlayPause->setText("Play");
+    }
 }
 
 void MainWindow::on_btn_PlayPause_4_clicked()
@@ -107,22 +113,76 @@ void MainWindow::on_btn_PlayPause_4_clicked()
     }
 }
 
-void MainWindow::on_btn_StopPlayer_clicked()
+void MainWindow::framesProccessed(unsigned long count, unsigned long buffer)
 {
-    this->videoPlayer->stopPlaying();
-    delete this->inputFileStream;
-    this->inputFileStream = NULL;
-    this->ui->btn_PlayPause_4->setText("Play");
+    QString tm;
+    unsigned long h, i, s;
+
+    count /= _DEFAULT_FPS;
+    buffer /= _DEFAULT_FPS;
+
+    h = count / 3600;
+    i = (count - h * 3600) / 60;
+    s = (count - h * 3600 - i * 60) ;
+
+    tm.sprintf("%02d:%02d:%02d", h, i, s);
+    this->ui->label_RecordedTime->setText(tm);
+
+    h = buffer / 3600;
+    i = (buffer - h * 3600) / 60;
+    s = (buffer - h * 3600 - i * 60) ;
+
+    tm.sprintf("%02d:%02d:%02d", h, i, s);
+    this->ui->label_InBuffer->setText(tm);
 }
 
-void MainWindow::changeFrame(VideoFramePointer frame)
+void MainWindow::framePlayed(unsigned long frame, unsigned long total)
 {
-    int second = this->videoPlayer->getFrameId() / this->inputFileStream->getHeader().fps;
-    this->ui->scroll_VidePlayer->setValue(second);
+    QString tm;
+    unsigned long h, i, s, ht, it, st;
+
+    frame /= _DEFAULT_FPS;
+    total /= _DEFAULT_FPS;
+
+    h = frame / 3600;
+    i = (frame - h * 3600) / 60;
+    s = (frame - h * 3600 - i * 60) ;
+
+    ht = total / 3600;
+    it = (total - h * 3600) / 60;
+    st = (total - h * 3600 - i * 60) ;
+
+    tm.sprintf("%02d:%02d:%02d / %02d:%02d:%02d", h, i, s, ht, it, st);
+    this->ui->label_TimePlayed->setText(tm);
+
+    this->ui->scroll_VidePlayer->setValue(frame);
+
+     if (!this->inputFileStream)
+        this->ui->label_TimePlayed->setText("00:00:00 / 00:00:00");
+}
+
+void MainWindow::on_btn_StopPlayer_clicked()
+{
+    if (this->inputFileStream) {
+        this->videoPlayer->stopPlaying();
+        this->videoPlayer->waitToFrameFinish();
+        delete this->inputFileStream;
+        this->inputFileStream = NULL;
+        this->ui->btn_PlayPause_4->setText("Play");
+        this->ui->scroll_VidePlayer->setValue(0);
+        this->ui->scroll_VidePlayer->setMaximum(0);
+        this->ui->label_TimePlayed->setText("00:00:00 / 00:00:00");
+    }
 }
 
 void MainWindow::on_scroll_VidePlayer_sliderMoved(int position)
 {
-    this->videoPlayer->setFrameId(position * this->inputFileStream->getHeader().fps);
+    if (this->inputFileStream)
+        this->videoPlayer->setFrameId(position * this->inputFileStream->getHeader().fps);
     // TODO : find better slot! It's just moving and no clicking
+}
+
+void MainWindow::on_tabWidget_3_tabBarClicked(int index)
+{
+    // TODO if index == 2 Library
 }

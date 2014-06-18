@@ -13,6 +13,7 @@ VideoRecorder::VideoRecorder(VideoConfig const &_config, QObject *parent) :
 
 VideoRecorder::~VideoRecorder()
 {
+    this->waitToFinish();
     this->stop();
     delete this->framesBuffer;
 }
@@ -31,6 +32,8 @@ void VideoRecorder::run()
             VideoFramePointer videoFrame = this->framesBuffer->back();
             this->framesBuffer->pop();
             this->framesBufferMutex->unlock();
+
+            emit framesProccessed(this->idFrame, this->framesBuffer->size());
 
             videoFrame->setType(this->idFrame % this->videoConfig.fps == 0 ? IFrame : PFrame);
 
@@ -51,6 +54,7 @@ void VideoRecorder::startRecording(IOutputVideoStream *out)
         this->idFrame = 0;
     } else if (this->out != out) {
         this->stopRecording();
+        this->waitToFinish();
         this->out = out;
         this->recording = true;
         this->idFrame = 0;
@@ -60,6 +64,10 @@ void VideoRecorder::startRecording(IOutputVideoStream *out)
 void VideoRecorder::stopRecording(void)
 {
     this->recording = false;
+}
+
+void VideoRecorder::waitToFinish()
+{
     while (this->framesBuffer->size() > 0);
 }
 

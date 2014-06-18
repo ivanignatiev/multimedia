@@ -33,7 +33,7 @@ void VideoInputControlThread::run()
 
         gettimeofday(&stop_loop, NULL);
 
-        elapsedTime = (stop_loop.tv_sec - start_loop.tv_sec) * 1000000;
+        elapsedTime = (stop_loop.tv_sec - start_loop.tv_sec) * _USECOND;
         elapsedTime = elapsedTime + (stop_loop.tv_usec - start_loop.tv_usec);
 
         if (elapsedTime < this->videoConfig.delta_time)

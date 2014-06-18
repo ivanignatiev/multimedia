@@ -3,10 +3,11 @@
 FileOutputVideoStream::FileOutputVideoStream(QString const &_filename, VideoHeader const &_header) :
     filename(_filename),
     filepath( _DEFAULT_RECORDS_FOLDER + _filename + _DEFAULT_VIDEO_EXT),
-    header(_header)
+    header(_header),
+    filebuf(new char[1024 * 2048])
 {
     this->fd = fopen(this->filepath.toStdString().c_str(), "w+");
-
+    setvbuf(this->fd, this->filebuf, _IOFBF, 1024 * 2048);
     if (!this->fd) {
         throw std::exception();
     }
@@ -18,6 +19,8 @@ FileOutputVideoStream::~FileOutputVideoStream()
 {
     this->writeFramesIndex();
     fclose(this->fd);
+
+    delete this->filebuf;
 }
 
 void FileOutputVideoStream::FileOutputVideoStream::pushFrameData(VideoFrameData &videoFrameData)
@@ -34,10 +37,14 @@ void FileOutputVideoStream::FileOutputVideoStream::pushFrameData(VideoFrameData 
 
 void FileOutputVideoStream::writeFramesIndex(void)
 {
+    fflush(this->fd);
+
     fseek(this->fd, 0, SEEK_SET);
     this->header.frames_count = this->frames.size();
 
     fwrite(&(this->header), sizeof(VideoHeader), 1, this->fd);
+
+    fflush(this->fd);
 
     fseek(this->fd, sizeof(VideoHeader) + this->header.content_length, SEEK_SET);
 
@@ -45,4 +52,6 @@ void FileOutputVideoStream::writeFramesIndex(void)
     for(;it != this->frames.end();++it) {
         fwrite(&((*it).header), sizeof(VideoFrameHeader), 1, this->fd);
     }
+
+    fflush(this->fd);
 }

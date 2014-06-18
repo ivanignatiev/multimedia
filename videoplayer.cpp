@@ -4,7 +4,8 @@ VideoPlayer::VideoPlayer() :
     idFrame(0),
     input(NULL),
     running(true),
-    step(1)
+    step(1),
+    waitFrame(false)
 {
 
 }
@@ -17,7 +18,13 @@ VideoPlayer::~VideoPlayer()
 void VideoPlayer::stop()
 {
     this->running = false;
+    this->waitToFrameFinish();
     this->wait();
+}
+
+void VideoPlayer::waitToFrameFinish(void)
+{
+    while (this->waitFrame);
 }
 
 void VideoPlayer::run()
@@ -27,7 +34,11 @@ void VideoPlayer::run()
     unsigned long long	elapsedTime;
 
     while (this->running) {
+
         if (this->input != NULL && this->playing) {
+
+            this->waitFrame = true;
+
             gettimeofday(&start_loop, NULL);
 
             VideoFrameData *frameData = this->input->getFrameData(this->idFrame);
@@ -35,6 +46,7 @@ void VideoPlayer::run()
             VideoFramePointer frame = VideoDecoder::processFrameData(frameData, &(this->input->getHeader()));
 
             emit frameChanged(frame);
+            emit framePlayed(this->idFrame, this->input->getHeader().frames_count);
 
             delete frameData;
 
@@ -42,8 +54,10 @@ void VideoPlayer::run()
 
             gettimeofday(&stop_loop, NULL);
 
-            elapsedTime = (stop_loop.tv_sec - start_loop.tv_sec) * 1000000;
+            elapsedTime = (stop_loop.tv_sec - start_loop.tv_sec) * _USECOND;
             elapsedTime = elapsedTime + (stop_loop.tv_usec - start_loop.tv_usec);
+
+            this->waitFrame = false;
 
             if (elapsedTime < ( _USECOND / this->input->getHeader().fps))
                 this->usleep(( _USECOND / this->input->getHeader().fps) - elapsedTime);
@@ -51,6 +65,7 @@ void VideoPlayer::run()
         } else {
             this->sleep(1);
         }
+
     }
 }
 
@@ -70,6 +85,7 @@ void VideoPlayer::stopPlaying()
 
 void VideoPlayer::setFrameId(unsigned long idFrame)
 {
+    this->waitToFrameFinish();
     this->idFrame = idFrame;
 }
 

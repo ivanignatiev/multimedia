@@ -39,10 +39,13 @@ private slots:
 
     void on_btn_StopPlayer_clicked();
 
+    void framesProccessed(unsigned long count, unsigned long buffer);
 
-    void changeFrame(VideoFramePointer frame);
+    void framePlayed(unsigned long frame, unsigned long total);
 
     void on_scroll_VidePlayer_sliderMoved(int position);
+
+    void on_tabWidget_3_tabBarClicked(int index);
 
 private:
 

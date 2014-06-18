@@ -42,8 +42,15 @@
     <addaction name="actionPlayer"/>
     <addaction name="actionControl_Panel"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionDevice"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindows"/>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget_RecordControl">
@@ -187,6 +194,48 @@
        </property>
        <layout class="QVBoxLayout" name="videoLayout"/>
       </widget>
+      <widget class="QLabel" name="label_RecordedTime">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>500</y>
+         <width>57</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>00:00:00</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_InBuffer">
+       <property name="geometry">
+        <rect>
+         <x>550</x>
+         <y>500</y>
+         <width>57</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>00:00:00</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_RecordingFileName">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>500</y>
+         <width>451</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>FileName</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -328,8 +377,43 @@
          <height>16</height>
         </rect>
        </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_TimePlayed">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>520</y>
+         <width>181</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>00:00:00 / 00:00:00</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_PlayingFileName">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>520</y>
+         <width>471</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>FileName</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </widget>
@@ -337,6 +421,16 @@
       <attribute name="title">
        <string>Library</string>
       </attribute>
+      <widget class="QListView" name="listView">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>601</width>
+         <height>521</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -357,6 +451,11 @@
   <action name="actionControl_Panel">
    <property name="text">
     <string>Control Panel</string>
+   </property>
+  </action>
+  <action name="actionDevice">
+   <property name="text">
+    <string>Device</string>
    </property>
   </action>
  </widget>

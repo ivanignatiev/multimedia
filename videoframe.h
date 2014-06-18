@@ -25,6 +25,8 @@ struct VideoFrameHeader {
 
 struct VideoFrameData {
     VideoFrameHeader    header;
+    unsigned int width;
+    unsigned int height;
     unsigned char       *data;
 };
 

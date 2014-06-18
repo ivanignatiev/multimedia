@@ -26,11 +26,12 @@ public:
 
     void setFrameId(unsigned long idFrame);
 
-    unsigned long getFrameId() const;
-
+    unsigned long getFrameId(void) const;
+    void waitToFrameFinish(void);
 private:
     bool running;
     bool playing;
+    bool waitFrame;
 
     IInputVideoStream   *input;
     int step;
@@ -38,6 +39,7 @@ private:
 
 signals:
     void frameChanged(VideoFramePointer frame);
+    void framePlayed(unsigned long frame, unsigned long total);
 };
 
 #endif // VIDEOPLAYER_H

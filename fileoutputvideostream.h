@@ -27,6 +27,7 @@ private:
     std::vector<VideoFrameData> frames;
 
     FILE *fd;
+    char *filebuf;
 };
 
 #endif // FILEOUTPUTVIDEOSTREAM_H
