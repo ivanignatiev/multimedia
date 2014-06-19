@@ -7,6 +7,7 @@
 #include "dct.h"
 #include "yuv.h"
 #include "videoframe.h"
+#include "huffman.h"
 
 class VideoEncoder
 {
@@ -28,6 +29,7 @@ private:
     static void applyDCT(VideoFrameData *data);
     static void applyDCTToBlock(bool uv, unsigned int x, unsigned int y, VideoFrameData *data);
     static void applyZeroRLE(VideoFrameData *data);
+    static void applyStaticHuffman(VideoFrameData *data);
 };
 
 #endif // VIDEOENCODER_H

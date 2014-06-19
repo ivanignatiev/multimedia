@@ -35,6 +35,7 @@ private:
     VideoConfig videoConfig;
     IOutputVideoStream *out;
     unsigned long idFrame;
+    bool frameProcessing;
 
 signals:
     void framesProccessed(unsigned long count, unsigned long buffer);

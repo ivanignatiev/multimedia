@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMainWindow>
 #include <QSharedPointer>
+#include <QInputDialog>
 #include "videoinputcontrolthread.h"
 #include "videorecorder.h"
 #include "videodevice.h"
@@ -13,6 +14,7 @@
 #include "videoplayer.h"
 #include "fileoutputvideostream.h"
 #include "fileinputvideostream.h"
+#include "videolibrary.h"
 
 namespace Ui {
 class MainWindow;
@@ -43,9 +45,14 @@ private slots:
 
     void framePlayed(unsigned long frame, unsigned long total);
 
-    void on_scroll_VidePlayer_sliderMoved(int position);
+    void on_actionDevice_triggered();
 
-    void on_tabWidget_3_tabBarClicked(int index);
+    void on_tabWidget_3_currentChanged(int index);
+
+    void on_list_Videos_doubleClicked(const QModelIndex &index);
+
+
+    void on_scroll_VidePlayer_valueChanged(int value);
 
 private:
 
@@ -54,6 +61,7 @@ private:
     VideoPlayer *videoPlayer;
     VideoDevice *videoDevice;
     Ui::MainWindow *ui;
+    VideoLibrary *videoLibrary;
 
     QGLCanvas   *videoRecorderScreen;
     QGLCanvas   *videoPlayerScreen;
@@ -61,6 +69,10 @@ private:
     VideoConfig videoConfig;
     FileOutputVideoStream *outputFileStream;
     FileInputVideoStream *inputFileStream;
+
+    void playFile(QFileInfo const &file);
+    void stopPlaying(void);
+    QFileInfo currentFile;
 };
 
 #endif // MAINWINDOW_H

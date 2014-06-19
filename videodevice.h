@@ -24,12 +24,23 @@ public:
     bool open();
     void close();
     bool isOpened() const;
+    bool setDeviceId(int device_id);
+    int getDeviceId(void) const;
 
+    void setWidth(unsigned int width);
+    void setHeight(unsigned int height);
+
+    unsigned int getWidth(void) const;
+    unsigned int getHeight(void) const;
 private:
     int    device_id;
 
     QMutex              *device_mutex;
     CvCapture           *device;
+
+    unsigned int width;
+    unsigned int height;
+
 };
 
 #endif // VIDEODEVICE_H

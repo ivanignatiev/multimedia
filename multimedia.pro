@@ -46,7 +46,8 @@ HEADERS  += mainwindow.h \
     fileinputvideostream.h \
     videodecoder.h \
     dct.h \
-    yuv.h
+    yuv.h \
+    huffman.h
 
 FORMS    += \
     mainwindow.ui
@@ -57,4 +58,5 @@ OTHER_FILES += \
 INCLUDEPATH += /usr/include/opencv
 
 LIBS += /usr/lib/x86_64-linux-gnu/libopencv_core.so \
-    /usr/lib/x86_64-linux-gnu/libopencv_highgui.so
+    /usr/lib/x86_64-linux-gnu/libopencv_highgui.so \
+    /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so

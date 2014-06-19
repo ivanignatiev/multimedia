@@ -5,6 +5,7 @@
 #include <opencv/highgui.h>
 #include <QImage>
 #include <QSharedPointer>
+#include "config.h"
 
 enum VideoFrameType {IFrame, PFrame};
 
@@ -18,7 +19,7 @@ struct VideoHeader {
 };
 
 struct VideoFrameHeader {
-    unsigned int content_length;
+    unsigned long content_length;
     VideoFrameType type;
     unsigned long data_adress;
 };

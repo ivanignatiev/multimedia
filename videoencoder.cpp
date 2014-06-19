@@ -217,7 +217,10 @@ void VideoEncoder::diff(VideoFrameData *data, unsigned char *previosFrameData)
     }
 }
 
+void VideoEncoder::applyStaticHuffman(VideoFrameData *data)
+{
 
+}
 
 VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
 {
