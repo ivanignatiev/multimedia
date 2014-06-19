@@ -50,7 +50,7 @@ void VideoPlayer::run()
 
             delete frameData;
 
-            this->idFrame = (this->idFrame + this->step ) % this->input->getHeader().frames_count;
+            this->idFrame = _MOD(this->idFrame + this->step , this->input->getHeader().frames_count);
 
             gettimeofday(&stop_loop, NULL);
 
@@ -92,4 +92,20 @@ void VideoPlayer::setFrameId(unsigned long idFrame)
 unsigned long VideoPlayer::getFrameId(void) const
 {
     return this->idFrame;
+}
+
+void VideoPlayer::setStep(int step)
+{
+    this->step = step;
+}
+
+int VideoPlayer::getStep(void) const
+{
+    return this->step;
+}
+
+void VideoPlayer::alignToSeconds(void)
+{
+    this->waitToFrameFinish();
+    this->idFrame = ( this->idFrame / this->input->getHeader().fps ) * this->input->getHeader().fps;
 }

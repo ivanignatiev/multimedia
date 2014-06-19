@@ -80,10 +80,14 @@ void MainWindow::on_btn_Record_clicked()
             bool ok;
             QString filename = QInputDialog::getText(this, "New video", "name", QLineEdit::Normal, "videofile", &ok);
 
-            if (ok && !filename.isEmpty())
-                this->outputFileStream = new FileOutputVideoStream(filename, vh);
-            else
-                return;
+            try {
+                if (ok && !filename.isEmpty())
+                    this->outputFileStream = new FileOutputVideoStream(filename, vh);
+                else
+                    return;
+            } catch (std::exception e) {
+                return ;
+            }
 
             this->ui->label_RecordingFileName->setText(filename);
         }
@@ -122,35 +126,38 @@ void MainWindow::stopPlaying()
         delete this->inputFileStream;
         this->inputFileStream = NULL;
         this->ui->btn_PlayPause_4->setText("Play");
-        this->ui->scroll_VidePlayer->setValue(0);
-        this->ui->scroll_VidePlayer->setMaximum(0);
+        this->ui->slider_VideoPlayer->setValue(0);
+        this->ui->slider_VideoPlayer->setMaximum(0);
         this->ui->label_TimePlayed->setText("00:00:00 / 00:00:00");
     }
 }
 
 void MainWindow::on_btn_PlayPause_4_clicked()
 {
+    this->videoPlayer->setStep(1);
+    this->ui->btn_Backward->setChecked(false);
+    this->ui->btn_Forward->setChecked(false);
+
     if (this->ui->btn_PlayPause_4->text() == "Play") {
         this->playFile(this->currentFile);
     } else {
         this->ui->btn_PlayPause_4->setText("Play");
-         this->videoPlayer->stopPlaying();
+        this->videoPlayer->stopPlaying();
     }
 }
 
 void MainWindow::playFile(QFileInfo const &file)
 {
-    this->stopPlaying();
 
     this->currentFile = file;
 
     try {
         if (this->inputFileStream == NULL) {
+
             this->inputFileStream = new FileInputVideoStream(this->currentFile.baseName());
             this->ui->label_PlayingFileName->setText(this->currentFile.baseName());
             int seconds = this->inputFileStream->getHeader().frames_count / this->inputFileStream->getHeader().fps;
-            this->ui->scroll_VidePlayer->setMaximum(seconds);
-            this->ui->scroll_VidePlayer->setPageStep(this->inputFileStream->getHeader().fps);
+            this->ui->slider_VideoPlayer->setMaximum(seconds);
         }
 
         this->ui->btn_PlayPause_4->setText("Pause");
@@ -206,9 +213,9 @@ void MainWindow::framePlayed(unsigned long frame, unsigned long total)
     tm.sprintf("%02d:%02d:%02d / %02d:%02d:%02d", h, i, s, ht, it, st);
     this->ui->label_TimePlayed->setText(tm);
 
-    this->ui->scroll_VidePlayer->blockSignals(true);
-    this->ui->scroll_VidePlayer->setValue(frame);
-    this->ui->scroll_VidePlayer->blockSignals(false);
+    this->ui->slider_VideoPlayer->blockSignals(true);
+    this->ui->slider_VideoPlayer->setValue(frame);
+    this->ui->slider_VideoPlayer->blockSignals(false);
 
      if (!this->inputFileStream)
         this->ui->label_TimePlayed->setText("00:00:00 / 00:00:00");
@@ -238,12 +245,47 @@ void MainWindow::on_tabWidget_3_currentChanged(int index)
 
 void MainWindow::on_list_Videos_doubleClicked(const QModelIndex &index)
 {
+    this->stopPlaying();
     this->playFile(this->videoLibrary->getFileInfoById(index.row()));
 }
 
-void MainWindow::on_scroll_VidePlayer_valueChanged(int value)
+
+void MainWindow::on_slider_VideoPlayer_valueChanged(int value)
 {
     if (this->inputFileStream) {
-        this->videoPlayer->setFrameId(this->ui->scroll_VidePlayer->value() * this->inputFileStream->getHeader().fps);
+           this->videoPlayer->setFrameId(value * this->inputFileStream->getHeader().fps);
+    }
+}
+
+
+void MainWindow::on_btn_Backward_clicked()
+{
+    if (!this->inputFileStream) {
+        this->ui->btn_Backward->setChecked(false);
+        return ;
+    }
+
+    if (this->ui->btn_Backward->isChecked()) {
+        this->ui->btn_Forward->setChecked(false);
+        this->videoPlayer->alignToSeconds();
+        this->videoPlayer->setStep(- this->inputFileStream->getHeader().fps );
+    } else {
+        this->videoPlayer->setStep(1);
+    }
+}
+
+void MainWindow::on_btn_Forward_clicked()
+{
+    if (!this->inputFileStream) {
+        this->ui->btn_Forward->setChecked(false);
+        return ;
+    }
+
+    if (this->ui->btn_Forward->isChecked()) {
+        this->ui->btn_Backward->setChecked(false);
+        this->videoPlayer->alignToSeconds();
+        this->videoPlayer->setStep( this->inputFileStream->getHeader().fps );
+    } else {
+        this->videoPlayer->setStep(1);
     }
 }

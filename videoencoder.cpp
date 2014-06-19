@@ -245,6 +245,7 @@ VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
     }
 
     VideoEncoder::applyZeroRLE(data);
+    VideoEncoder::applyStaticHuffman(data);
 
     return data;
 }

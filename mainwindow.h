@@ -51,8 +51,12 @@ private slots:
 
     void on_list_Videos_doubleClicked(const QModelIndex &index);
 
+    void on_slider_VideoPlayer_valueChanged(int value);
 
-    void on_scroll_VidePlayer_valueChanged(int value);
+
+    void on_btn_Backward_clicked();
+
+    void on_btn_Forward_clicked();
 
 private:
 

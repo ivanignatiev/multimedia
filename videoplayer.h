@@ -1,7 +1,6 @@
 #ifndef VIDEOPLAYER_H
 #define VIDEOPLAYER_H
 
-
 #include <QThread>
 #include <sys/time.h>
 #include "config.h"
@@ -9,6 +8,8 @@
 #include "videoframe.h"
 #include "videodecoder.h"
 #include "iinputvideostream.h"
+
+# define _MOD(x, d)		(((d) + ((x) % (d))) % (d))
 
 class VideoPlayer : public QThread
 {
@@ -26,8 +27,13 @@ public:
 
     void setFrameId(unsigned long idFrame);
 
+    void alignToSeconds(void);
+
     unsigned long getFrameId(void) const;
     void waitToFrameFinish(void);
+
+    void setStep(int step);
+    int getStep(void) const;
 private:
     bool running;
     bool playing;
