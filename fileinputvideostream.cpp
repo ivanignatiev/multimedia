@@ -26,7 +26,7 @@ VideoFrameData *FileInputVideoStream::getFrameData(unsigned long id)
 
     fseek(this->fd, sizeof(VideoHeader) + frame->header.data_adress, SEEK_SET);
     frame->data = new unsigned char[frame->header.content_length];
-    fread(frame->data, frame->header.content_length, 1, this->fd);
+    fread(frame->data, sizeof(unsigned char), frame->header.content_length, this->fd);
 
     return frame;
 }

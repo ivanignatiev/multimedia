@@ -7,7 +7,7 @@ VideoPlayer::VideoPlayer() :
     step(1),
     waitFrame(false)
 {
-
+    VideoDecoder::prepareDecoder();
 }
 
 VideoPlayer::~VideoPlayer()

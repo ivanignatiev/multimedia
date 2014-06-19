@@ -1,5 +1,8 @@
 #include "videodecoder.h"
 
+
+std::map<hufkey, unsigned char> VideoDecoder::huffman_decompressor;
+
 unsigned char *VideoDecoder::previosFrameData = NULL;
 float VideoDecoder::dct_cos[DCT_block_size * DCT_block_size] = { DCT_cos };
 float VideoDecoder::dcty_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization_Y };
@@ -8,6 +11,8 @@ float VideoDecoder::dctuv_quantization[DCT_block_size * DCT_block_size] = { DCT_
 int VideoDecoder::zigzag_way[DCT_block_size * DCT_block_size] = { ZIGZAG_WAY };
 float VideoDecoder::result[DCT_block_size * DCT_block_size] = { 0 };
 float VideoDecoder::block[DCT_block_size * DCT_block_size] = { 0 };
+unsigned short VideoDecoder::huffman[256] = { Huffman_table };
+unsigned short VideoDecoder::huffman_size[256] = { Huffman_table_size };
 
 VideoDecoder::VideoDecoder()
 {
@@ -154,11 +159,53 @@ void VideoDecoder::decompresseZeroRLE(VideoFrameData *data)
     delete result;
 }
 
+void VideoDecoder::decompresseStaticHuffman(VideoFrameData *data)
+{
+    std::vector<unsigned char> result(0);
+
+    unsigned short acc = 0;
+    unsigned long total_decoded = 0, i = 0, j = 0;
+
+    unsigned int lbit = 0;
+
+    unsigned long should_decoded = *((unsigned long*)(data->data));
+
+    result.resize(should_decoded, 0);
+
+    unsigned char *dataP = data->data + sizeof(unsigned long);
+    unsigned short *dataR = (unsigned short*)dataP;
+
+    unsigned int frameSize = sizeof(unsigned short) * 8;
+
+    for (i = 0; total_decoded < should_decoded; ++i) {
+        for (j = 1; j <= frameSize && total_decoded < should_decoded; ++j) {
+            acc = (acc << 1) | ((dataR[i] & (1 << (frameSize - j))) > 0);
+
+            if (VideoDecoder::huffman_decompressor.find(hufkey(acc, lbit + 1)) != VideoDecoder::huffman_decompressor.end()) {
+                result[total_decoded] =  VideoDecoder::huffman_decompressor[hufkey(acc, lbit + 1)];
+                acc = 0;
+                lbit = 0;
+                total_decoded++;
+            } else {
+             ++lbit;
+            }
+        }
+    }
+
+    delete[] data->data;
+    data->header.content_length = should_decoded;
+
+    data->data = new unsigned char[data->header.content_length];
+    std::memcpy(data->data, result.data(), data->header.content_length);
+
+}
+
 VideoFrame *VideoDecoder::processFrameData(VideoFrameData *frameData, VideoHeader const *header)
 {
     frameData->width = header->width;
     frameData->height = header->height;
 
+    VideoDecoder::decompresseStaticHuffman(frameData);
     VideoDecoder::decompresseZeroRLE(frameData);
 
     if (frameData->header.type == PFrame) {
@@ -174,4 +221,12 @@ VideoFrame *VideoDecoder::processFrameData(VideoFrameData *frameData, VideoHeade
     VideoDecoder::convertYUVtoRGB(frameData);
 
     return new VideoFrame(frameData, header);
+}
+
+void VideoDecoder::prepareDecoder(void)
+{
+    for (unsigned int i = 0; i < 256; ++i) {
+        VideoDecoder::huffman_decompressor[hufkey(VideoDecoder::huffman[i], VideoDecoder::huffman_size[i])] = (unsigned char)i;
+    }
+
 }

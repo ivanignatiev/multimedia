@@ -224,21 +224,23 @@ void VideoEncoder::diff(VideoFrameData *data, unsigned char *previosFrameData)
 void VideoEncoder::applyStaticHuffman(VideoFrameData *data)
 {
     unsigned int buffer_size = 100;
-    std::vector<unsigned short> result(buffer_size);
+    std::vector<unsigned short> result(buffer_size, 0);
 
-    unsigned int r, bits = 0;
+    unsigned long r, bits = 0;
     int rest;
     unsigned short hb = 0, lb = 0;
     unsigned char b;
     unsigned int frameSize = sizeof(unsigned short) * 8;
 
-    for (int i = 0; i < data->header.content_length; ++i) {
+    unsigned short acc = 0;
+
+   for (int i = 0; i < data->header.content_length; ++i) {
         b = data->data[i];
         r = bits / frameSize;
 
         if (r > buffer_size - 10) {
             buffer_size += 100;
-            result.resize(buffer_size);
+            result.resize(buffer_size, 0);
         }
 
         rest = frameSize - bits % frameSize;
@@ -258,12 +260,16 @@ void VideoEncoder::applyStaticHuffman(VideoFrameData *data)
         lb = 0;
 
         bits += VideoEncoder::huffman_size[b];
+
     }
 
-    data->header.content_length = bits / 8 + (bits % 8 != 0);
-    delete data->data;
+    unsigned long decompressed_length = data->header.content_length;
+    data->header.content_length = (bits / 8) + (unsigned int)(bits % 8 != 0) + sizeof(decompressed_length);
+    data->header.content_length += (unsigned int)(data->header.content_length % 2 != 0);
+    delete[] data->data;
     data->data = new unsigned char[data->header.content_length];
-    std::memcpy(data->data, (unsigned char*)result.data(), data->header.content_length);
+    *((unsigned long*)(data->data)) = decompressed_length;
+    std::memcpy(data->data + sizeof(decompressed_length), (unsigned char*)(result.data()), data->header.content_length - sizeof(decompressed_length));
 }
 
 VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
@@ -289,7 +295,7 @@ VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
     }
 
     VideoEncoder::applyZeroRLE(data);
-    //VideoEncoder::applyStaticHuffman(data);
+    VideoEncoder::applyStaticHuffman(data);
 
     return data;
 }
