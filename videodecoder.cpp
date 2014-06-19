@@ -48,7 +48,7 @@ void VideoDecoder::convertYUVtoRGB(VideoFrameData *frameData)
             RGB_data[RGB_step + i] = (unsigned char)g;
             RGB_data[RGB_step * 2 + i] = (unsigned char)b;
 
-            //RGB_data[i] = RGB_data[RGB_step + i] = RGB_data[RGB_step * 2 + i] = (unsigned char)C;
+           // RGB_data[i] = RGB_data[RGB_step + i] = RGB_data[RGB_step * 2 + i] = (unsigned char)E;
 
 
             ++i;

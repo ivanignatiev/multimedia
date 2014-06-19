@@ -222,10 +222,10 @@ void VideoEncoder::applyZeroRLE(VideoFrameData *data)
         }
     }
     data->header.content_length = k;
-    delete data->data;
+    delete[] data->data;
     data->data = new unsigned char[k];
     std::memcpy(data->data, rle_result, k);
-    delete rle_result;
+    delete[] rle_result;
 }
 
 void VideoEncoder::diff(VideoFrameData *data, unsigned char *previosFrameData)
@@ -301,7 +301,7 @@ VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
         VideoEncoder::diff(data, VideoEncoder::previosFrameData);
     } else if (data->header.type == IFrame) {
         if (VideoEncoder::previosFrameData)
-            delete VideoEncoder::previosFrameData;
+            delete[] VideoEncoder::previosFrameData;
         unsigned char *preDiffData = new unsigned char[data->header.content_length];
         std::memcpy(preDiffData, data->data, data->header.content_length);
         VideoEncoder::previosFrameData = preDiffData;
