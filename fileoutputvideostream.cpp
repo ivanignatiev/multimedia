@@ -4,10 +4,10 @@ FileOutputVideoStream::FileOutputVideoStream(QString const &_filename, VideoHead
     filename(_filename),
     filepath( _DEFAULT_RECORDS_FOLDER + _filename + _DEFAULT_VIDEO_EXT),
     header(_header),
-    filebuf(new char[1024 * 2048])
+    filebuf(new char[1024 * 10240])
 {
     this->fd = fopen(this->filepath.toStdString().c_str(), "w+");
-    setvbuf(this->fd, this->filebuf, _IOFBF, 1024 * 2048);
+    setvbuf(this->fd, this->filebuf, _IOFBF, 1024 * 10240);
     if (!this->fd) {
         throw std::exception();
     }

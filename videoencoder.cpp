@@ -30,7 +30,7 @@ void VideoEncoder::convertRGBToYUV(VideoFramePointer frame, VideoFrameData *data
     unsigned int i = 0, jy = 0, j = 0, yK = (data->width / 2);
     float L;
     unsigned char Y, U, V;
-    unsigned char r, g, b;
+    unsigned int r, g, b;
 
     for (int y = 0; y < data->height; ++y) {
         jy = ((y - y % 2) / 2) * yK;
@@ -47,7 +47,21 @@ void VideoEncoder::convertRGBToYUV(VideoFramePointer frame, VideoFrameData *data
             data->data[i] = Y;
 
             if (x % 2 == 0 && y % 2 == 0) {
+                if (y != data->height && x != data->width) {
+                    QRgb rgb1 = frame->asQImage().pixel(x + 1, y);
+                    r += qRed(rgb); g += qGreen(rgb); b += qBlue(rgb);
+
+                    QRgb rgb2 = frame->asQImage().pixel(x + 1, y + 1);
+                    r += qRed(rgb); g += qGreen(rgb); b += qBlue(rgb);
+
+                    QRgb rgb3 = frame->asQImage().pixel(x, y + 1);
+                    r += qRed(rgb); g += qGreen(rgb); b += qBlue(rgb);
+
+                    r /= 4; g /= 4; b /= 4;
+                }
+
                 U = (224.0 * 0.5 * (1.0 * b - L) / ((1.0 - YUV_KB) * 255.0)) + 128;
+
                 V = (224.0 * 0.5 * (1.0 * r - L) / ((1.0 - YUV_KR) * 255.0)) + 128;
 
                 j = jy + ((x - x % 2) / 2);
@@ -290,7 +304,6 @@ VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
             delete VideoEncoder::previosFrameData;
         unsigned char *preDiffData = new unsigned char[data->header.content_length];
         std::memcpy(preDiffData, data->data, data->header.content_length);
-        // TODO : add to destructor
         VideoEncoder::previosFrameData = preDiffData;
     }
 

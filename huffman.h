@@ -1,7 +1,7 @@
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
 
-typedef std::pair<unsigned short, unsigned short> hufkey;
+typedef QPair<unsigned short, unsigned short> hufkey;
 
 /*
 #define Huffman_table 0b00000000, \

@@ -1,7 +1,7 @@
 #include "videodecoder.h"
 
 
-std::map<hufkey, unsigned char> VideoDecoder::huffman_decompressor;
+QHash<hufkey, unsigned char> VideoDecoder::huffman_decompressor;
 
 unsigned char *VideoDecoder::previosFrameData = NULL;
 float VideoDecoder::dct_cos[DCT_block_size * DCT_block_size] = { DCT_cos };
@@ -55,7 +55,7 @@ void VideoDecoder::convertYUVtoRGB(VideoFrameData *frameData)
         }
     }
 
-    delete frameData->data;
+    delete[] frameData->data;
     frameData->data = RGB_data;
 }
 
@@ -152,16 +152,16 @@ void VideoDecoder::decompresseZeroRLE(VideoFrameData *data)
         }
     }
 
-    delete data->data;
+    delete[] data->data;
     data->data = new unsigned char[k];
     std::memcpy(data->data, result, k);
     data->header.content_length = k;
-    delete result;
+    delete[] result;
 }
 
 void VideoDecoder::decompresseStaticHuffman(VideoFrameData *data)
 {
-    std::vector<unsigned char> result(0);
+
 
     unsigned short acc = 0;
     unsigned long total_decoded = 0, i = 0, j = 0;
@@ -170,7 +170,7 @@ void VideoDecoder::decompresseStaticHuffman(VideoFrameData *data)
 
     unsigned long should_decoded = *((unsigned long*)(data->data));
 
-    result.resize(should_decoded, 0);
+    unsigned char *result = new unsigned char[should_decoded];
 
     unsigned char *dataP = data->data + sizeof(unsigned long);
     unsigned short *dataR = (unsigned short*)dataP;
@@ -195,8 +195,7 @@ void VideoDecoder::decompresseStaticHuffman(VideoFrameData *data)
     delete[] data->data;
     data->header.content_length = should_decoded;
 
-    data->data = new unsigned char[data->header.content_length];
-    std::memcpy(data->data, result.data(), data->header.content_length);
+    data->data = result;
 
 }
 

@@ -83,9 +83,12 @@ void MainWindow::on_btn_Record_clicked()
             try {
                 if (ok && !filename.isEmpty())
                     this->outputFileStream = new FileOutputVideoStream(filename, vh);
-                else
+                else {
+                    this->ui->btn_Record->setChecked(false);
                     return;
+                }
             } catch (std::exception e) {
+                this->ui->btn_Record->setChecked(false);
                 return ;
             }
 

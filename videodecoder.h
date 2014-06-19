@@ -2,7 +2,7 @@
 #define VIDEODECODER_H
 
 #include <vector>
-#include <map>
+#include <QHash>
 #include "config.h"
 #include "dct.h"
 #include "yuv.h"
@@ -25,7 +25,7 @@ private:
 
     static unsigned short huffman[256];
     static unsigned short huffman_size[256];
-    static std::map<hufkey, unsigned char> huffman_decompressor;
+    static QHash<hufkey, unsigned char> huffman_decompressor;
 
     static void convertYUVtoRGB(VideoFrameData *data);
     static void merge(VideoFrameData *data, unsigned char *previousData);
