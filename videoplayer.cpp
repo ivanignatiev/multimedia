@@ -43,14 +43,20 @@ void VideoPlayer::run()
 
             VideoFrameData *frameData = this->input->getFrameData(this->idFrame);
 
-            VideoFramePointer frame = VideoDecoder::processFrameData(frameData, &(this->input->getHeader()));
+            VideoFramePointer frame = VideoFramePointer(VideoDecoder::processFrameData(frameData, &(this->input->getHeader())));
 
             emit frameChanged(frame);
             emit framePlayed(this->idFrame, this->input->getHeader().frames_count);
 
+            delete frameData->data;
             delete frameData;
 
-            this->idFrame = _MOD(this->idFrame + this->step , this->input->getHeader().frames_count);
+            this->idFrame = this->idFrame + this->step;
+
+            if (this->idFrame >= this->input->getHeader().frames_count)
+                this->idFrame = 0;
+            else if (this->step < 0 && this->idFrame <= 0)
+                this->idFrame = (this->input->getHeader().frames_count / this->input->getHeader().fps) * this->input->getHeader().fps;
 
             gettimeofday(&stop_loop, NULL);
 

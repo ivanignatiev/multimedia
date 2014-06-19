@@ -2,7 +2,9 @@
 
 unsigned char *VideoDecoder::previosFrameData = NULL;
 float VideoDecoder::dct_cos[DCT_block_size * DCT_block_size] = { DCT_cos };
-float VideoDecoder::dct_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization };
+float VideoDecoder::dcty_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization_Y };
+float VideoDecoder::dctuv_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization_UV };
+
 int VideoDecoder::zigzag_way[DCT_block_size * DCT_block_size] = { ZIGZAG_WAY };
 float VideoDecoder::result[DCT_block_size * DCT_block_size] = { 0 };
 float VideoDecoder::block[DCT_block_size * DCT_block_size] = { 0 };
@@ -55,7 +57,7 @@ void VideoDecoder::convertYUVtoRGB(VideoFrameData *frameData)
 void VideoDecoder::iDCTBlock(unsigned int offset, unsigned int width, unsigned int x, unsigned int y, VideoFrameData *data)
 {
     unsigned int i, j, k;
-    float v;
+    float v, q;
 
     for (i = 0; i < DCT_block_size; ++i) {
         for (j = 0; j < DCT_block_size; ++j) {
@@ -69,8 +71,10 @@ void VideoDecoder::iDCTBlock(unsigned int offset, unsigned int width, unsigned i
             VideoDecoder::result[i * DCT_block_size + j] = 0;
             for (k = 0; k < DCT_block_size; ++k) {
                 v = VideoDecoder::block[k * DCT_block_size + j];
-                if (v > 0.99)
-                    VideoDecoder::result[i * DCT_block_size + j] += VideoDecoder::dct_cos[k * DCT_block_size + i] * ((v - 128.0) * VideoDecoder::dct_quantization[k * DCT_block_size + j]);
+                if (v > 0.99) {
+                    q = offset > 0 ? VideoDecoder::dctuv_quantization[k * DCT_block_size + j] : VideoDecoder::dcty_quantization[k * DCT_block_size + j];
+                    VideoDecoder::result[i * DCT_block_size + j] += VideoDecoder::dct_cos[k * DCT_block_size + i] * ((v - 128.0) * q);
+                }
             }
         }
     }
@@ -147,9 +151,10 @@ void VideoDecoder::decompresseZeroRLE(VideoFrameData *data)
     data->data = new unsigned char[k];
     std::memcpy(data->data, result, k);
     data->header.content_length = k;
+    delete result;
 }
 
-VideoFramePointer VideoDecoder::processFrameData(VideoFrameData *frameData, VideoHeader const *header)
+VideoFrame *VideoDecoder::processFrameData(VideoFrameData *frameData, VideoHeader const *header)
 {
     frameData->width = header->width;
     frameData->height = header->height;
@@ -161,7 +166,6 @@ VideoFramePointer VideoDecoder::processFrameData(VideoFrameData *frameData, Vide
     } else if(frameData->header.type == IFrame) {
         if (VideoDecoder::previosFrameData)
             delete VideoDecoder::previosFrameData;
-        // TODO : delete destructor
         VideoDecoder::previosFrameData = new unsigned char[frameData->header.content_length];
         std::memcpy(VideoDecoder::previosFrameData, frameData->data, frameData->header.content_length);
     }
@@ -169,7 +173,5 @@ VideoFramePointer VideoDecoder::processFrameData(VideoFrameData *frameData, Vide
     VideoDecoder::iDCT(frameData);
     VideoDecoder::convertYUVtoRGB(frameData);
 
-    VideoFramePointer frame = VideoFramePointer(new VideoFrame(frameData, header));
-
-    return frame;
+    return new VideoFrame(frameData, header);
 }

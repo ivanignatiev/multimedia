@@ -14,7 +14,7 @@ public:
     FileOutputVideoStream(QString const &filename, VideoHeader const &_header);
     virtual ~FileOutputVideoStream();
 
-    virtual void pushFrameData(VideoFrameData &videoFrameData);
+    virtual void pushFrameData(VideoFrameData *videoFrameData);
 
 private:
 
@@ -24,7 +24,7 @@ private:
     QString filepath;
 
     VideoHeader header;
-    std::vector<VideoFrameData> frames;
+    std::vector<VideoFrameData*> frames;
 
     FILE *fd;
     char *filebuf;

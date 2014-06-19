@@ -2,10 +2,13 @@
 
 unsigned char *VideoEncoder::previosFrameData = NULL;
 float VideoEncoder::dct_cos[DCT_block_size * DCT_block_size] = { DCT_cos };
-float VideoEncoder::dct_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization };
+float VideoEncoder::dcty_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization_Y };
+float VideoEncoder::dctuv_quantization[DCT_block_size * DCT_block_size] = { DCT_quantization_UV };
 int VideoEncoder::zigzag_way[DCT_block_size * DCT_block_size] = { ZIGZAG_WAY };
 float VideoEncoder::result[8][3][DCT_block_size * DCT_block_size];
 float VideoEncoder::block[8][3][DCT_block_size * DCT_block_size];
+unsigned short VideoEncoder::huffman[256] = { Huffman_table };
+unsigned short VideoEncoder::huffman_size[256] = { Huffman_table_size };
 
 VideoEncoder::VideoEncoder()
 {
@@ -129,14 +132,14 @@ void VideoEncoder::applyDCTToBlock(bool uv, unsigned int x, unsigned int y, Vide
     }
 
     for (i = 0; i < DCT_block_size * DCT_block_size; ++i) {
-        VideoEncoder::result[tid][0][i] = VideoEncoder::block[tid][0][i] / VideoEncoder::dct_quantization[i];
+        VideoEncoder::result[tid][0][i] = VideoEncoder::block[tid][0][i] / VideoEncoder::dcty_quantization[i];
         VideoEncoder::result[tid][0][i] = (VideoEncoder::result[tid][0][i] >= -0.5 && VideoEncoder::result[tid][0][i] <= 0.5) ? 0.0 : VideoEncoder::result[tid][0][i] + 128.0;
 
         if (uv) {
-            VideoEncoder::result[tid][1][i] = VideoEncoder::block[tid][1][i] / VideoEncoder::dct_quantization[i];
+            VideoEncoder::result[tid][1][i] = VideoEncoder::block[tid][1][i] / VideoEncoder::dctuv_quantization[i];
             VideoEncoder::result[tid][1][i] = (VideoEncoder::result[tid][1][i] >= -0.5 && VideoEncoder::result[tid][1][i] <= 0.5) ? 0.0 : VideoEncoder::result[tid][1][i] + 128.0;
 
-            VideoEncoder::result[tid][2][i] = VideoEncoder::block[tid][2][i] / VideoEncoder::dct_quantization[i];
+            VideoEncoder::result[tid][2][i] = VideoEncoder::block[tid][2][i] / VideoEncoder::dctuv_quantization[i];
             VideoEncoder::result[tid][2][i] = (VideoEncoder::result[tid][2][i] >= -0.5 && VideoEncoder::result[tid][2][i] <= 0.5) ? 0.0 : VideoEncoder::result[tid][2][i] + 128.0;
         }
 
@@ -208,6 +211,7 @@ void VideoEncoder::applyZeroRLE(VideoFrameData *data)
     delete data->data;
     data->data = new unsigned char[k];
     std::memcpy(data->data, rle_result, k);
+    delete rle_result;
 }
 
 void VideoEncoder::diff(VideoFrameData *data, unsigned char *previosFrameData)
@@ -219,7 +223,47 @@ void VideoEncoder::diff(VideoFrameData *data, unsigned char *previosFrameData)
 
 void VideoEncoder::applyStaticHuffman(VideoFrameData *data)
 {
+    unsigned int buffer_size = 100;
+    std::vector<unsigned short> result(buffer_size);
 
+    unsigned int r, bits = 0;
+    int rest;
+    unsigned short hb = 0, lb = 0;
+    unsigned char b;
+    unsigned int frameSize = sizeof(unsigned short) * 8;
+
+    for (int i = 0; i < data->header.content_length; ++i) {
+        b = data->data[i];
+        r = bits / frameSize;
+
+        if (r > buffer_size - 10) {
+            buffer_size += 100;
+            result.resize(buffer_size);
+        }
+
+        rest = frameSize - bits % frameSize;
+        rest = (VideoEncoder::huffman_size[b] - rest);
+
+        if (rest >= 0) {
+            hb |= VideoEncoder::huffman[b] >> rest;
+            lb |= VideoEncoder::huffman[b] << frameSize - rest;
+        } else {
+            hb |= VideoEncoder::huffman[b] << -rest;
+        }
+
+        result[r] |= hb;
+        result[r + 1] |= lb;
+
+        hb = 0;
+        lb = 0;
+
+        bits += VideoEncoder::huffman_size[b];
+    }
+
+    data->header.content_length = bits / 8 + (bits % 8 != 0);
+    delete data->data;
+    data->data = new unsigned char[data->header.content_length];
+    std::memcpy(data->data, (unsigned char*)result.data(), data->header.content_length);
 }
 
 VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
@@ -245,7 +289,7 @@ VideoFrameData *VideoEncoder::proccessFrame(VideoFramePointer frame)
     }
 
     VideoEncoder::applyZeroRLE(data);
-    VideoEncoder::applyStaticHuffman(data);
+    //VideoEncoder::applyStaticHuffman(data);
 
     return data;
 }

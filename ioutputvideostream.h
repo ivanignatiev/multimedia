@@ -7,7 +7,7 @@ class IOutputVideoStream
 {
 public:
     virtual ~IOutputVideoStream() {}
-    virtual void pushFrameData(VideoFrameData &videoFrameData) = 0;
+    virtual void pushFrameData(VideoFrameData *videoFrameData) = 0;
 };
 
 #endif // IOUTPUTVIDEOSTREAM_H

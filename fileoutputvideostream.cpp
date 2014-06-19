@@ -23,15 +23,15 @@ FileOutputVideoStream::~FileOutputVideoStream()
     delete this->filebuf;
 }
 
-void FileOutputVideoStream::FileOutputVideoStream::pushFrameData(VideoFrameData &videoFrameData)
+void FileOutputVideoStream::FileOutputVideoStream::pushFrameData(VideoFrameData *videoFrameData)
 {
-    videoFrameData.header.data_adress = this->header.content_length;
-    this->header.content_length += videoFrameData.header.content_length;
+    videoFrameData->header.data_adress = this->header.content_length;
+    this->header.content_length += videoFrameData->header.content_length;
 
-    fwrite(videoFrameData.data, videoFrameData.header.content_length, 1, this->fd );
+    fwrite(videoFrameData->data, videoFrameData->header.content_length, 1, this->fd );
 
-    delete videoFrameData.data;
-    videoFrameData.data = NULL;
+    delete videoFrameData->data;
+    videoFrameData->data = NULL;
     this->frames.push_back(videoFrameData);
 }
 
@@ -48,9 +48,9 @@ void FileOutputVideoStream::writeFramesIndex(void)
 
     fseek(this->fd, sizeof(VideoHeader) + this->header.content_length, SEEK_SET);
 
-    std::vector<VideoFrameData>::iterator it = this->frames.begin();
+    std::vector<VideoFrameData*>::iterator it = this->frames.begin();
     for(;it != this->frames.end();++it) {
-        fwrite(&((*it).header), sizeof(VideoFrameHeader), 1, this->fd);
+        fwrite(&((*it)->header), sizeof(VideoFrameHeader), 1, this->fd);
     }
 
     fflush(this->fd);

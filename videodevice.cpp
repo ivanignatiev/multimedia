@@ -19,13 +19,14 @@ VideoFrame *VideoDevice::getFrame()
 {
     this->device_mutex->lock();
     IplImage *frame = cvQueryFrame(this->device);
-    IplImage *resizedframe = cvCreateImage( cvSize(_DEFAULT_SCREEN_WIDTH , _DEFAULT_SCREEN_HEIGHT),
+    IplImage *resizedframe = cvCreateImage( cvSize(this->getWidth() , this->getHeight()),
                                          frame->depth, frame->nChannels );
     cvResize(frame, resizedframe);
-    if (frame) {
+    if (resizedframe) {
         VideoFrame *vd_frame = new VideoFrame(resizedframe);
 
         this->device_mutex->unlock();
+        cvReleaseImage(&resizedframe);
         return vd_frame;
     }
     this->device_mutex->unlock();

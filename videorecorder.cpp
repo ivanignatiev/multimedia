@@ -42,7 +42,8 @@ void VideoRecorder::run()
             videoFrame->setType(this->idFrame % this->videoConfig.fps == 0 ? IFrame : PFrame);
 
             VideoFrameData *frame = VideoEncoder::proccessFrame(videoFrame);
-            this->out->pushFrameData(*frame);
+            this->out->pushFrameData(frame);
+
             this->idFrame++;
 
             this->frameProcessing = false;

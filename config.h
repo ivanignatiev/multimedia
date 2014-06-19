@@ -6,12 +6,11 @@
 #define _DEFAULT_FPS        25
 #define _USECOND            1000000
 #define _DEFAULT_DEVICE_ID  0
-#define _DEFAULT_SCREEN_WIDTH   530
+#define _DEFAULT_SCREEN_WIDTH   528
 #define _DEFAULT_SCREEN_HEIGHT  480
 #define _FORMAT_VERSION         1
 #define _DEFAULT_RECORDS_FOLDER         "./records/"
 #define _DEFAULT_VIDEO_EXT              ".vid"
-
 
 struct VideoConfig {
     unsigned int fps;
